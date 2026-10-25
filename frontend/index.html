@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Hospital Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/app.js" defer></script>
+</head>
+<body>
+    <header class="topbar">
+        <div>
+            <h1>Smart Hospital</h1>
+            <p>Patient Management Dashboard</p>
+        </div>
+        <span class="status-badge">● System Online</span>
+    </header>
+
+    <main class="container">
+        <section class="welcome">
+            <div>
+                <h2>Hospital Overview</h2>
+                <p>Manage patients, queues and hospital resources.</p>
+            </div>
+            <span id="currentDate"></span>
+        </section>
+
+        <section class="stats-grid">
+            <article class="stat-card">
+                <p>Total Patients</p>
+                <h2 id="totalPatients">0</h2>
+            </article>
+            <article class="stat-card">
+                <p>Waiting Patients</p>
+                <h2 id="waitingPatients">0</h2>
+            </article>
+            <article class="stat-card emergency-card">
+                <p>Emergency Patients</p>
+                <h2 id="emergencyPatients">0</h2>
+            </article>
+            <article class="stat-card">
+                <p>Available Beds</p>
+                <h2 id="availableBeds">20</h2>
+            </article>
+        </section>
+
+        <section class="panel">
+            <h2>Patient Registration</h2>
+            <form id="patientForm">
+                <div class="form-grid">
+                    <label>
+                        Patient ID
+                        <input type="text" id="patientId"
+                               placeholder="e.g. P101" required>
+                    </label>
+                    <label>
+                        Patient Name
+                        <input type="text" id="patientName"
+                               placeholder="Enter full name" required>
+                    </label>
+                    <label>
+                        Age
+                        <input type="number" id="patientAge"
+                               min="0" max="120" placeholder="Age" required>
+                    </label>
+                    <label>
+                        Severity Level
+                        <select id="severity" required>
+                            <option value="">Select severity</option>
+                            <option value="1">Level 1 - Highest</option>
+                            <option value="2">Level 2</option>
+                            <option value="3">Level 3</option>
+                            <option value="4">Level 4</option>
+                            <option value="5">Level 5 - Lowest</option>
+                        </select>
+                    </label>
+                    <label>
+                        Department
+                        <select id="department" required>
+                            <option value="">Select department</option>
+                            <option>Emergency</option>
+                            <option>Cardiology</option>
+                            <option>Neurology</option>
+                            <option>Orthopedics</option>
+                            <option>General Medicine</option>
+                            <option>Pediatrics</option>
+                        </select>
+                    </label>
+                </div>
+                <button type="submit" class="primary-btn">
+                    Register Patient
+                </button>
+                <p id="formMessage" role="status"></p>
+            </form>
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <h2>Patient Records</h2>
+                <input type="search" id="searchPatient"
+                       placeholder="Search by Patient ID">
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Patient ID</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Severity</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientTable">
+                        <tr>
+                            <td colspan="6">No patients registered yet.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="queues-grid">
+            <article class="panel">
+                <h2>Normal Waiting Queue</h2>
+                <ol id="normalQueue">
+                    <li>No patients waiting.</li>
+                </ol>
+            </article>
+
+            <article class="panel">
+                <h2>Emergency Priority Queue</h2>
+                <p class="hint">
+                    Demo only: Severity 1 is highest priority.
+                </p>
+                <ol id="emergencyQueue">
+                    <li>No emergency patients.</li>
+                </ol>
+            </article>
+        </section>
+
+        <section class="panel">
+            <h2>Resource Availability</h2>
+            <div class="resource-grid">
+                <div>
+                    <p>Available Beds</p>
+                    <h3 id="freeBeds">20</h3>
+                    <span class="resource-status available">Available</span>
+                </div>
+                <div>
+                    <p>Occupied Beds</p>
+                    <h3 id="occupiedBeds">0</h3>
+                    <span class="resource-status occupied">Occupied</span>
+                </div>
+            </div>
+            <p class="hint">
+                Demo data only. Registration does not automatically assign a bed.
+            </p>
+        </section>
+    </main>
+
+    <footer>
+        <p>Smart Hospital Management System | Academic Demo</p>
+        <p>Sample data only — not for clinical decision-making.</p>
+    </footer>
+</body>
+</html>
