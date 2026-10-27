@@ -1,8 +1,10 @@
 "use strict";
 
-const CAPACITY = 20;
 const patients = [];
-let nextOrder = 0;
+let normalQueue = [];
+let emergencyQueue = [];
+let resources = { total: 20, available: 20, occupied: 0 };
+let displayedPatients = [];
 
 const form = document.getElementById("patientForm");
 const table = document.getElementById("patientTable");
@@ -13,7 +15,6 @@ const totalPatientsElement = document.getElementById("totalPatients");
 const waitingPatientsElement = document.getElementById("waitingPatients");
 const emergencyPatientsElement = document.getElementById("emergencyPatients");
 const availableBedsElement = document.getElementById("availableBeds");
-
 const freeBedsElement = document.getElementById("freeBeds");
 const occupiedBedsElement = document.getElementById("occupiedBeds");
 
@@ -40,7 +41,7 @@ function renderQueue(elementId, items, emptyText) {
     const list = document.getElementById(elementId);
     list.replaceChildren();
 
-    if (items.length === 0) {
+    if (!items.length) {
         const item = document.createElement("li");
         item.textContent = emptyText;
         item.className = "empty-queue";
@@ -50,42 +51,31 @@ function renderQueue(elementId, items, emptyText) {
 
     items.forEach(patient => {
         const item = document.createElement("li");
-
-        item.textContent =
-            `${patient.id} — ${patient.name} · Level ${patient.severity}`;
-
+        item.textContent = `${patient.id} — ${patient.name} · Level ${patient.severity}`;
         list.appendChild(item);
     });
 }
 
-function renderTable() {
-    const query = search.value.trim().toLowerCase();
-
-    const filteredPatients = patients.filter(patient =>
-        patient.id.toLowerCase().includes(query)
-    );
-
+function renderTable(items = displayedPatients) {
     table.replaceChildren();
 
-    if (filteredPatients.length === 0) {
+    if (!items.length) {
         const row = document.createElement("tr");
         const cell = addCell(
             row,
-            patients.length > 0
+            search.value.trim()
                 ? "No matching patients found."
                 : "No patients registered yet."
         );
-
         cell.colSpan = 6;
         cell.className = "empty-row";
         table.appendChild(row);
         return;
     }
 
-    filteredPatients.forEach(patient => {
+    items.forEach(patient => {
         const row = document.createElement("tr");
-
-        addCell(row, patient.id);
+        addCell(row, String(patient.id));
         addCell(row, patient.name);
         addCell(row, String(patient.age));
         addCell(row, `Level ${patient.severity}`);
@@ -93,74 +83,106 @@ function renderTable() {
 
         const statusCell = addCell(row, "");
         const badge = document.createElement("span");
-
-        badge.className =
-            patient.severity <= 2
-                ? "pill emergency"
-                : "pill";
-
-        badge.textContent =
-            patient.severity <= 2
-                ? "Priority Queue"
-                : "Waiting";
-
+        badge.className = patient.severity <= 2 ? "pill emergency" : "pill";
+        badge.textContent = patient.severity <= 2 ? "Priority Queue" : "Waiting";
         statusCell.appendChild(badge);
-        table.appendChild(row);
+        statusCell.appendChild(document.createElement("br"));
+
+        const bedButton = document.createElement("button");
+        bedButton.type = "button";
+        bedButton.textContent = patient.hasBed ? "Release bed" : "Assign bed";
+        bedButton.className = "bed-action-button";
+        bedButton.addEventListener("click", () => changeBed(patient));
+        statusCell.appendChild(bedButton);
+table.appendChild(row);
     });
 }
 
 function renderResources() {
-    // This is a demo: registering a patient does not assign a bed.
-    const occupiedBeds = 0;
-    const availableBeds = CAPACITY - occupiedBeds;
+    const total = resources.total || 20;
+    const available = resources.available || 0;
+    const occupied = resources.occupied || 0;
 
-    availableBedsElement.textContent = availableBeds;
-    freeBedsElement.textContent = availableBeds;
-    occupiedBedsElement.textContent = occupiedBeds;
+    availableBedsElement.textContent = available;
+    freeBedsElement.textContent = available;
+    occupiedBedsElement.textContent = occupied;
 
     document.getElementById("availableProgress").style.width =
-        `${(availableBeds / CAPACITY) * 100}%`;
-
+        `${Math.max(0, Math.min(100, (available / total) * 100))}%`;
     document.getElementById("occupiedProgress").style.width =
-        `${(occupiedBeds / CAPACITY) * 100}%`;
+        `${Math.max(0, Math.min(100, (occupied / total) * 100))}%`;
 }
 
 function renderDashboard() {
-    const emergencyPatients = patients
-        .filter(patient => patient.severity <= 2)
-        .sort((a, b) =>
-            a.severity - b.severity || a.order - b.order
-        );
-
-    const normalPatients = patients.filter(
-        patient => patient.severity >= 3
-    );
-
     totalPatientsElement.textContent = patients.length;
+    waitingPatientsElement.textContent = normalQueue.length;
+    emergencyPatientsElement.textContent = emergencyQueue.length;
 
-    // Normal waiting queue only; priority patients are counted separately.
-    waitingPatientsElement.textContent = normalPatients.length;
-
-    emergencyPatientsElement.textContent = emergencyPatients.length;
-
-    renderTable();
-
-    renderQueue(
-        "normalQueue",
-        normalPatients,
-        "No patients waiting."
-    );
-
-    renderQueue(
-        "emergencyQueue",
-        emergencyPatients,
-        "No priority patients."
-    );
-
+    renderTable(displayedPatients);
+    renderQueue("normalQueue", normalQueue, "No patients waiting.");
+    renderQueue("emergencyQueue", emergencyQueue, "No priority patients.");
     renderResources();
 }
 
-form.addEventListener("submit", function(event) {
+async function loadDashboard() {
+    try {
+        const response = await fetch("/api/patients");
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || "Could not load patients.");
+
+        patients.splice(0, patients.length, ...data.patients);
+        normalQueue = data.normalQueue;
+        emergencyQueue = data.emergencyQueue;
+        resources = data.resources;
+
+        const query = search.value.trim();
+        if (query) {
+            await runSearch();
+        } else {
+            displayedPatients = [...patients];
+            renderDashboard();
+        }
+    } catch (error) {
+        showMessage(`Backend connection error: ${error.message}`, true);
+    }
+}
+
+async function runSearch() {
+    const query = search.value.trim();
+    if (!query) {
+        displayedPatients = [...patients];
+        renderTable(displayedPatients);
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/patients?search=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        displayedPatients = response.ok && data.ok ? [data.patient] : [];
+        renderTable(displayedPatients);
+    } catch (error) {
+        showMessage("Could not search patients. Check the backend server.", true);
+    }
+}
+
+async function changeBed(patient) {
+    const action = patient.hasBed ? "release" : "assign";
+    try {
+        const response = await fetch("/api/beds", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action, patient_id: patient.id })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || "Bed operation failed.");
+        await loadDashboard();
+        showMessage(data.message);
+    } catch (error) {
+        showMessage(error.message, true);
+    }
+}
+
+form.addEventListener("submit", async function(event) {
     event.preventDefault();
 
     const id = document.getElementById("patientId").value.trim();
@@ -169,51 +191,37 @@ form.addEventListener("submit", function(event) {
     const severityValue = document.getElementById("severity").value;
     const department = document.getElementById("department").value;
 
+    const numericId = Number(id);
     const age = Number(ageValue);
     const severity = Number(severityValue);
 
     if (
-        !id ||
-        !name ||
-        !department ||
-        ageValue === "" ||
-        !Number.isInteger(age) ||
-        age < 0 ||
-        age > 120 ||
+        !id || !Number.isInteger(numericId) || numericId <= 0 ||
+        !name || !department || ageValue === "" ||
+        !Number.isInteger(age) || age < 0 || age > 120 ||
         ![1, 2, 3, 4, 5].includes(severity)
     ) {
-        showMessage("Please enter valid details in every field.", true);
+        showMessage("Enter a positive numeric ID and valid details in every field.", true);
         return;
     }
 
-    const duplicate = patients.some(patient =>
-        patient.id.toLowerCase() === id.toLowerCase()
-    );
+    try {
+        const response = await fetch("/api/patients", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: numericId, name, age, severity, department })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || "Registration failed.");
 
-    if (duplicate) {
-        showMessage(
-            "This Patient ID already exists. Please use another ID.",
-            true
-        );
-        return;
+        form.reset();
+        search.value = "";
+        await loadDashboard();
+        showMessage(data.message || "Patient registered successfully.");
+    } catch (error) {
+        showMessage(error.message, true);
     }
-
-    patients.push({
-        id,
-        name,
-        age,
-        severity,
-        department,
-        order: nextOrder++
-    });
-
-    form.reset();
-    search.value = "";
-
-    renderDashboard();
-    showMessage("Patient registered successfully.");
 });
 
-search.addEventListener("input", renderTable);
-
-renderDashboard();
+search.addEventListener("input", runSearch);
+loadDashboard();

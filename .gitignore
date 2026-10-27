@@ -1,1 +1,16 @@
 tests/*.exe
+# Executable files
+*.exe
+
+# Patient data - keep private
+data/*.txt
+
+# Temporary backup files
+*.backup.js
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Accidental terminal-error file
+At line*
