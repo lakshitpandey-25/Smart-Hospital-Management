@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b1020">
+    <title>Smart Hospital | Management Dashboard</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/app.js" defer></script>
+</head>
+<body>
+
+    <div class="background-glow glow-one"></div>
+    <div class="background-glow glow-two"></div>
+    <div class="background-glow glow-three"></div>
+
+    <header class="navbar">
+        <a href="#overview" class="brand">
+            <span class="brand-icon">✚</span>
+            <span>
+                <strong>Smart<span class="brand-accent">Care</span></strong>
+                <small>HOSPITAL MANAGEMENT</small>
+            </span>
+        </a>
+
+        <nav class="nav-links">
+            <a href="#overview" class="nav-link active">Dashboard</a>
+            <a href="#registration" class="nav-link">Registration</a>
+            <a href="#records" class="nav-link">Patients</a>
+            <a href="#queues" class="nav-link">Queues</a>
+        </nav>
+
+        <div class="nav-status">
+            <span class="status-dot"></span>
+            <span>System Online</span>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="welcome-section" id="overview">
+            <div>
+                <div class="eyebrow">
+                    <span class="eyebrow-dot"></span>
+                    HOSPITAL OPERATIONS
+                </div>
+
+                <h1>Your care,<br>
+                    <span class="gradient-text">beautifully organised.</span>
+                </h1>
+
+                <p class="welcome-description">
+                    Manage patient records, waiting queues and hospital resources
+                    from one simple dashboard.
+                </p>
+            </div>
+
+            <div class="date-card glass">
+                <span class="date-icon">◷</span>
+                <div>
+                    <small>TODAY</small>
+                    <strong id="currentDate">Loading date...</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-grid" aria-label="Hospital statistics">
+
+            <article class="stat-card glass">
+                <div class="stat-top">
+                    <span class="stat-label">Total Patients</span>
+                    <span class="stat-icon icon-blue">♧</span>
+                </div>
+                <h2 id="totalPatients">0</h2>
+                <p>Registered patients</p>
+                <div class="stat-bottom">
+                    <span class="mini-dot blue-dot"></span>
+                    All patient records
+                </div>
+            </article>
+
+            <article class="stat-card glass">
+                <div class="stat-top">
+                    <span class="stat-label">Waiting Patients</span>
+                    <span class="stat-icon icon-purple">◷</span>
+                </div>
+                <h2 id="waitingPatients">0</h2>
+                <p>Awaiting attention</p>
+                <div class="stat-bottom">
+                    <span class="mini-dot purple-dot"></span>
+                    Normal waiting queue
+                </div>
+            </article>
+
+            <article class="stat-card glass">
+                <div class="stat-top">
+                    <span class="stat-label">Priority Patients</span>
+                    <span class="stat-icon icon-red">✚</span>
+                </div>
+                <h2 id="emergencyPatients">0</h2>
+                <p>Severity levels 1–2</p>
+                <div class="stat-bottom">
+                    <span class="mini-dot red-dot"></span>
+                    Demo priority queue
+                </div>
+            </article>
+
+            <article class="stat-card glass">
+                <div class="stat-top">
+                    <span class="stat-label">Available Beds</span>
+                    <span class="stat-icon icon-green">▦</span>
+                </div>
+                <h2 id="availableBeds">20</h2>
+                <p>Demo capacity: 20 beds</p>
+                <div class="stat-bottom">
+                    <span class="mini-dot green-dot"></span>
+                    Available resources
+                </div>
+            </article>
+
+        </section>
+
+        <section class="panel glass" id="registration">
+            <div class="panel-heading">
+                <div>
+                    <span class="section-kicker">NEW ENTRY</span>
+                    <h2>Patient Registration</h2>
+                    <p>Add a patient to the hospital records.</p>
+                </div>
+                <span class="heading-icon">＋</span>
+            </div>
+
+            <form id="patientForm">
+                <div class="form-grid">
+
+                    <label>
+                        Patient ID
+                        <input
+                            type="text"
+                            id="patientId"
+                            placeholder="e.g. P101"
+                            maxlength="30"
+                            required
+                        >
+                    </label>
+
+                    <label>
+                        Patient Name
+                        <input
+                            type="text"
+                            id="patientName"
+                            placeholder="Enter full name"
+                            maxlength="100"
+                            required
+                        >
+                    </label>
+
+                    <label>
+                        Age
+                        <input
+                            type="number"
+                            id="patientAge"
+                            min="0"
+                            max="120"
+                            placeholder="Enter age"
+                            required
+                        >
+                    </label>
+
+                    <label>
+                        Severity Level
+                        <select id="severity" required>
+                            <option value="">Select severity</option>
+                            <option value="1">Level 1 — Highest</option>
+                            <option value="2">Level 2 — High</option>
+                            <option value="3">Level 3 — Medium</option>
+                            <option value="4">Level 4 — Low</option>
+                            <option value="5">Level 5 — Lowest</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Department
+                        <select id="department" required>
+                            <option value="">Select department</option>
+                            <option value="Emergency">Emergency</option>
+                            <option value="Cardiology">Cardiology</option>
+                            <option value="Neurology">Neurology</option>
+                            <option value="Orthopedics">Orthopedics</option>
+                            <option value="Pediatrics">Pediatrics</option>
+                            <option value="General Medicine">General Medicine</option>
+                        </select>
+                    </label>
+
+                </div>
+
+                <div class="form-footer">
+                    <p id="formMessage" role="status" aria-live="polite"></p>
+                    <button type="submit" class="primary-btn">
+                        <span>＋</span> Register Patient
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel glass" id="records">
+            <div class="panel-heading records-heading">
+                <div>
+                    <span class="section-kicker">PATIENT DIRECTORY</span>
+                    <h2>Patient Records</h2>
+                    <p>Search and view registered patient details.</p>
+                </div>
+
+                <div class="search-box">
+                    <span>⌕</span>
+                    <input
+                        type="search"
+                        id="searchPatient"
+                        placeholder="Search Patient ID..."
+                        aria-label="Search by Patient ID"
+                    >
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Patient ID</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Severity</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientTable">
+                        <tr>
+                            <td colspan="6" class="empty-row">
+                                No patients registered yet.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="queues-grid" id="queues">
+
+            <article class="panel glass">
+                <div class="panel-heading">
+                    <div>
+                        <span class="section-kicker">STANDARD QUEUE</span>
+                        <h2>Waiting Patients</h2>
+                        <p>Severity levels 3–5</p>
+                    </div>
+                    <span class="queue-icon normal-icon">◷</span>
+                </div>
+
+                <ol id="normalQueue" class="queue-list">
+                    <li class="empty-queue">No patients waiting.</li>
+                </ol>
+            </article>
+
+            <article class="panel glass">
+                <div class="panel-heading">
+                    <div>
+                        <span class="section-kicker">PRIORITY QUEUE</span>
+                        <h2>Emergency Priority</h2>
+                        <p>Severity 1 is highest priority.</p>
+                    </div>
+                    <span class="queue-icon emergency-icon">✚</span>
+                </div>
+
+                <ol id="emergencyQueue" class="queue-list">
+                    <li class="empty-queue">No priority patients.</li>
+                </ol>
+
+                <p class="disclaimer">
+                    Academic demo only — not a clinical triage system.
+                </p>
+            </article>
+
+        </section>
+
+        <section class="panel glass" id="resources">
+            <div class="panel-heading">
+                <div>
+                    <span class="section-kicker">HOSPITAL CAPACITY</span>
+                    <h2>Resource Availability</h2>
+                    <p>Illustrative bed availability for the demo.</p>
+                </div>
+                <span class="heading-icon">▦</span>
+            </div>
+
+            <div class="resource-grid">
+
+                <div class="resource-box">
+                    <div class="resource-top">
+                        <span>Available Beds</span>
+                        <span class="resource-status available">Available</span>
+                    </div>
+                    <h3 id="freeBeds">20</h3>
+                    <div class="progress-track">
+                        <div id="availableProgress" class="progress-fill available-fill"></div>
+                    </div>
+                    <small>Of 20 total demo beds</small>
+                </div>
+
+                <div class="resource-box">
+                    <div class="resource-top">
+                        <span>Occupied Beds</span>
+                        <span class="resource-status occupied">Occupied</span>
+                    </div>
+                    <h3 id="occupiedBeds">0</h3>
+                    <div class="progress-track">
+                        <div id="occupiedProgress" class="progress-fill occupied-fill"></div>
+                    </div>
+                    <small>Illustrative occupancy only</small>
+                </div>
+
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-brand">
+                <span class="brand-icon small-brand">✚</span>
+                SmartCare
+            </div>
+            <p>Academic Hospital Management Project · Sample data only</p>
+        </footer>
+
+    </main>
+
+</body>
+</html>
